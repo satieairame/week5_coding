@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(palmerpenguins)
-library(effsize)
+library(effsize) # contains Cohen's D effect size function
 library(broom)
 library(ggbeeswarm)
 library(car)
@@ -45,4 +45,55 @@ chinstraps %>%
   )
 
 ```
+
+Create vectors of body_mass_g for female and male chinstrap penguins separately (in preparation for running two-sample t-test)
+
+```{r}
+chinstraps_f <- chinstraps %>% 
+  filter(sex == "female") %>% 
+  pull(body_mass_g) # pull the values from a function that we specify
+
+chinstraps_m <- chinstraps %>% 
+  filter(sex == "chinsmale") %>% 
+  pull(body_mass_g)
+```
+
+## T-tests, a couple different ways
+
+1. Is there a significant difference in body mass between male and female penguins?
+
+```{r}
+chinstrap_ttest <- t.test(chinstraps_f, chinstraps_m)
+chinstrap_ttest
+
+cohen.d(chinstraps_f, chinstraps_m)
+```
+
+## Lowest line is the mean of the two groups in the order that we input them.
+## t-value is how different from 0means are on the t-distribution, df = measure of sample size, p-value is probability that we got sample means at least as different as this by random chance if they were drawn from populations of the same mean.
+## conclusion is that there is a significant different in mean body mass between male and female chinstrap penguins.
+## Cohen's D = -1.26 is large so there is a big difference between male and female chinstrap penguins
+
+Use `broom::tidy()` to get messy model outputs into tidy data frames that are easy to reference! 
+
+```{r}
+chinstrap_out <- broom::tidy(chinstrap_ttest)
+chinstrap_out
+```
+
+
+Are male chinstrap penguins significantly larger (body mass) than female chinstrap penguins? (One-sided test, only interested in one tail of t-distribution), order matters!
+
+```{r}
+t.test(chinstraps_m, chinstraps_f, alternative = "greater") # or "less" depending on argument and order. Is male mass greater than female mass?
+```
+
+## Male chinstrap penguins body mass is sigificantly greater than female chinstrap penguin body mass.
+
+
+
+
+
+
+
 
